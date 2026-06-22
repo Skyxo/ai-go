@@ -105,55 +105,55 @@ python main.py
 
 ## 📊 Training & Evaluation Results
 
-[cite_start]To build a competent AI for the game of Go, our system relies on Monte Carlo Tree Search (MCTS) guided by two distinct neural networks: a Policy Network to propose promising moves, and a Value Network to evaluate the board state[cite: 307]. [cite_start]The training process is divided into an initial supervised learning phase (using datasets generated via KataGo) followed by a self-play reinforcement learning phase[cite: 377, 378, 666].
+To build a competent AI for the game of Go, our system relies on Monte Carlo Tree Search (MCTS) guided by two distinct neural networks: a Policy Network to propose promising moves, and a Value Network to evaluate the board state. The training process is divided into an initial supervised learning phase (using datasets generated via KataGo) followed by a self-play reinforcement learning phase.
 
 Below is the chronological breakdown of the training dynamics and the final evaluation.
 
 ### 1 · Policy Network Convergence (Entropy)
 
-[cite_start]**Context:** The Policy Network's job is to predict the probability distribution over all possible legal moves from a given board state[cite: 317, 388]. [cite_start]To monitor its stability during the supervised training phase, we track its prediction *entropy*, which measures the dispersion of probabilities[cite: 516, 520]. [cite_start]High entropy means the model is hesitant (uniform distribution), while low entropy means it is highly confident[cite: 520].
+**Context:** The Policy Network's job is to predict the probability distribution over all possible legal moves from a given board state. To monitor its stability during the supervised training phase, we track its prediction *entropy*, which measures the dispersion of probabilities. High entropy means the model is hesitant (uniform distribution), while low entropy means it is highly confident.
 
 <img src="https://github.com/user-attachments/assets/d438a4ef-0da5-4350-abb1-64191c79b077" width="720" alt="Policy entropy">
 
-* [cite_start]**Steady Confidence Growth:** The entropy smoothly falls from an initial ~3.5 nats down to ~2.2 nats[cite: 551, 552, 554]. [cite_start]This indicates that the network is becoming increasingly confident in its predictions without overfitting or becoming overly rigid[cite: 552, 554, 555].
-* [cite_start]**Optimizer Refresh:** The vertical green lines mark deliberate `refresh_model` events where the optimizer's momentum is reset[cite: 550, 553]. [cite_start]Notice that these resets do not disrupt the entropy, proving that the model's confidence remains stable even when escaping optimization plateaus[cite: 553].
+* **Steady Confidence Growth:** The entropy smoothly falls from an initial ~3.5 nats down to ~2.2 nats. This indicates that the network is becoming increasingly confident in its predictions without overfitting or becoming overly rigid.
+* **Optimizer Refresh:** The vertical green lines mark deliberate `refresh_model` events where the optimizer's momentum is reset. Notice that these resets do not disrupt the entropy, proving that the model's confidence remains stable even when escaping optimization plateaus.
 
 ### 2 · Value Network Learning Curve
 
-[cite_start]**Context:** While the Policy Network suggests *what* to play, the Value Network evaluates *who is winning* by predicting the current player's probability of victory (a scalar between 0 and 1)[cite: 328, 329]. [cite_start]We track this using Mean Squared Error (MSE) and the R² coefficient of determination to ensure the predictions accurately reflect the true game outcomes[cite: 602, 603].
+**Context:** While the Policy Network suggests *what* to play, the Value Network evaluates *who is winning* by predicting the current player's probability of victory (a scalar between 0 and 1). We track this using Mean Squared Error (MSE) and the R² coefficient of determination to ensure the predictions accurately reflect the true game outcomes.
 
 <img src="https://github.com/user-attachments/assets/5550562e-4ab5-4471-b521-850d9a8003e5" width="720" alt="Value-net loss & R²">
 
-* [cite_start]**Top (MSE):** The training (blue) and validation (red) losses decline steadily before stabilizing around 0.05 after epoch 150[cite: 656]. [cite_start]The periodic green lines (optimizer refresh) and grey lines (learning rate scheduler drops) effectively push the network out of local minima to refine its accuracy[cite: 657]. 
-* [cite_start]**Bottom (R²):** The coefficient of determination climbs from ~0.58 and plateaus at ~0.75[cite: 658]. [cite_start]This means the Value Network successfully captures 75% of the target variance, providing highly reliable board evaluations for the MCTS without showing signs of overfitting[cite: 658, 659].
+* **Top (MSE):** The training (blue) and validation (red) losses decline steadily before stabilizing around 0.05 after epoch 150. The periodic green lines (optimizer refresh) and grey lines (learning rate scheduler drops) effectively push the network out of local minima to refine its accuracy. 
+* **Bottom (R²):** The coefficient of determination climbs from ~0.58 and plateaus at ~0.75. This means the Value Network successfully captures 75% of the target variance, providing highly reliable board evaluations for the MCTS without showing signs of overfitting.
 
 ### 3 · Reinforcement Learning via Self-Play
 
-[cite_start]**Context:** After the supervised learning phase, the agent is trained through self-play (playing against its own previous iterations) to discover new strategies without human data[cite: 666, 669]. [cite_start]Each iteration consists of generating 50 new games (approx. 3,000 board positions), updating the networks over 25 epochs, and evaluating the new model[cite: 672, 673, 677, 776, 777]. 
+**Context:** After the supervised learning phase, the agent is trained through self-play (playing against its own previous iterations) to discover new strategies without human data. Each iteration consists of generating 50 new games (approx. 3,000 board positions), updating the networks over 25 epochs, and evaluating the new model. 
 
 <img src="https://github.com/user-attachments/assets/e53fb909-7ab4-42e6-863c-4b0a7056e906" width="720" alt="Policy & Value losses by iteration">
 
-* [cite_start]**Policy Loss (Left):** Over 9 iterations (moving from dark purple to yellow), the Kullback-Leibler (KL) divergence drops significantly[cite: 779]. [cite_start]Iteration 1 starts at 3.3 and finishes at 2.6, while by Iteration 9, the loss starts and stays closer to 1.9[cite: 780, 781]. [cite_start]This shows the policy is aligning faster and more accurately with the targets generated by the MCTS[cite: 781].
-* [cite_start]**Value Loss (Right):** A similar rapid improvement is visible[cite: 782]. [cite_start]The starting loss drops from 0.40 in the first iteration down to a stable 0.23–0.24 plateau by iterations 8 and 9[cite: 782]. [cite_start]The Value network successfully scales its precision alongside the increasing complexity of the self-play games[cite: 783].
+* **Policy Loss (Left):** Over 9 iterations (moving from dark purple to yellow), the Kullback-Leibler (KL) divergence drops significantly. Iteration 1 starts at 3.3 and finishes at 2.6, while by Iteration 9, the loss starts and stays closer to 1.9. This shows the policy is aligning faster and more accurately with the targets generated by the MCTS.
+* **Value Loss (Right):** A similar rapid improvement is visible. The starting loss drops from 0.40 in the first iteration down to a stable 0.23–0.24 plateau by iterations 8 and 9. The Value network successfully scales its precision alongside the increasing complexity of the self-play games.
 
 ### 4 · Final Evaluation: Neural Agent vs. Classic MCTS
 
-[cite_start]**Context:** To definitively prove the efficiency of the neural integration, we pitted our final Neural MCTS against a "classic" heuristic-only MCTS baseline (which relies on random rollouts and no neural networks)[cite: 846]. [cite_start]To ensure a fair comparison, both agents were restricted to an identical computation budget of exactly 800 simulations per move[cite: 846, 847]. 
+**Context:** To definitively prove the efficiency of the neural integration, we pitted our final Neural MCTS against a "classic" heuristic-only MCTS baseline (which relies on random rollouts and no neural networks). To ensure a fair comparison, both agents were restricted to an identical computation budget of exactly 800 simulations per move. 
 
 | **Neural agent vs. pure MCTS** (100-game match-up) |
 |----------------------------------------------------|
 | <img src="https://github.com/user-attachments/assets/a12eb50e-accd-4b43-becf-45df975961dc" width="650" alt="Win-rate histogram"> |
 
-* [cite_start]**Crushing Superiority:** The neural agent (green) achieved a massive **96% win rate** over 100 games[cite: 849]. [cite_start]It secured 47 wins out of 50 while playing Black, and 49 out of 50 while playing White[cite: 849].
-* [cite_start]**Conclusion:** This proves that replacing random rollouts with a Value Network and guiding tree expansion with a Policy Network drastically increases the quality of the search[cite: 850, 851]. [cite_start]At an equal simulation budget, the neural architecture makes vastly superior decisions[cite: 852].
+* **Crushing Superiority:** The neural agent (green) achieved a massive **96% win rate** over 100 games. It secured 47 wins out of 50 while playing Black, and 49 out of 50 while playing White.
+* **Conclusion:** This proves that replacing random rollouts with a Value Network and guiding tree expansion with a Policy Network drastically increases the quality of the search. At an equal simulation budget, the neural architecture makes vastly superior decisions.
 
 ---
 
 ## 🔬 Research Internals
 
-* [cite_start]**Minimal Input Planes:** To keep training fast and force the network to learn genuine tactics (rather than relying on pre-calculated heuristics), the board state is simplified into just 2 binary channels: current player stones and opponent stones[cite: 318, 381].
-* [cite_start]**Top-k Expansion:** During the MCTS expansion phase, the algorithm is restricted to exploring only the top *k* most probable moves suggested by the Policy Network, effectively managing the massive search space of Go and keeping tree growth in check[cite: 360, 362].
-* [cite_start]**Optimizer Refresh Mechanism:** We implemented a custom `refresh_model` routine that periodically resets the momentum buffer of the RAdam optimizer without altering the network weights[cite: 454, 500]. [cite_start]This frees the model from accumulated momentum that can "freeze" attention coefficients, allowing it to rapidly escape optimization plateaus[cite: 501, 503, 504].
+* **Minimal Input Planes:** To keep training fast and force the network to learn genuine tactics (rather than relying on pre-calculated heuristics), the board state is simplified into just 2 binary channels: current player stones and opponent stones.
+* **Top-k Expansion:** During the MCTS expansion phase, the algorithm is restricted to exploring only the top *k* most probable moves suggested by the Policy Network, effectively managing the massive search space of Go and keeping tree growth in check.
+* **Optimizer Refresh Mechanism:** We implemented a custom `refresh_model` routine that periodically resets the momentum buffer of the RAdam optimizer without altering the network weights. This frees the model from accumulated momentum that can "freeze" attention coefficients, allowing it to rapidly escape optimization plateaus.
 
 
 ---
