@@ -2,7 +2,7 @@
 
 A compact, research-grade re-implementation of the **AlphaGo Zero** pipeline on a 9 × 9 board.
 
-📄 **Project report (PDF)** → [docs/Rapport_PE_050_2024.pdf](docs/Rapport_PE_050_2024.pdf)  
+**Project report (PDF)** → [docs/Rapport_PE_050_2024.pdf](docs/Rapport_PE_050_2024.pdf)  
 *Section 5 (Neural Networks) and all technical appendices were written by **Charles Bergeat***.
 
 The engine combines **Monte-Carlo Tree Search (MCTS)** with twin neural networks (policy + value).  
@@ -11,7 +11,7 @@ The engine combines **Monte-Carlo Tree Search (MCTS)** with twin neural networks
 
 ---
 
-### 🎮 A Glimpse of the GUI
+### A Glimpse of the GUI
 
 | Main launcher (board size & mode) | In-game 19 × 19 goban |
 |---|---|
@@ -21,7 +21,7 @@ The engine combines **Monte-Carlo Tree Search (MCTS)** with twin neural networks
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 | Axis                | Highlights                                                                                                                                                          |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -34,7 +34,7 @@ The engine combines **Monte-Carlo Tree Search (MCTS)** with twin neural networks
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 PE50-AI-for-the-Game-of-GO/
@@ -56,7 +56,7 @@ PE50-AI-for-the-Game-of-GO/
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ```bash
 # Clone & enter
@@ -74,7 +74,7 @@ pip install torch numpy matplotlib tqdm tkinter
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1 · Pre-Training + Self-Play
 
@@ -103,7 +103,7 @@ python main.py
 
 ---
 
-## 📊 Training & Evaluation Results
+## Training & Evaluation Results
 
 To build a competent AI for the game of Go, our system relies on Monte Carlo Tree Search (MCTS) guided by two distinct neural networks: a Policy Network to propose promising moves, and a Value Network to evaluate the board state. The training process is divided into an initial supervised learning phase (using datasets generated via KataGo) followed by a self-play reinforcement learning phase.
 
@@ -149,30 +149,11 @@ Below is the chronological breakdown of the training dynamics and the final eval
 
 ---
 
-## 🔬 Research Internals
+## Research Internals
 
 * **Minimal Input Planes:** To keep training fast and force the network to learn genuine tactics (rather than relying on pre-calculated heuristics), the board state is simplified into just 2 binary channels: current player stones and opponent stones.
 * **Top-k Expansion:** During the MCTS expansion phase, the algorithm is restricted to exploring only the top *k* most probable moves suggested by the Policy Network, effectively managing the massive search space of Go and keeping tree growth in check.
 * **Optimizer Refresh Mechanism:** We implemented a custom `refresh_model` routine that periodically resets the momentum buffer of the RAdam optimizer without altering the network weights. This frees the model from accumulated momentum that can "freeze" attention coefficients, allowing it to rapidly escape optimization plateaus.
-
-
----
-
-## 🛣️ Roadmap
-
-* [ ] Curriculum learning for 13×13 then 19×19
-* [ ] SGF export + GTP bridge
-* [ ] Distributed self-play (Ray / MPI)
-* [ ] Heat-map overlay inside the GUI
-* [ ] CI pipeline & pre-commit hooks
-
----
-
-## 🤝 Contributing
-
-1. **Fork** → create a feature branch (`feat/your-feature`).
-2. Format with `black` / `flake8`, run tests if you add them.
-3. Open a detailed Pull Request (screenshots welcome!).
 
 ---
 
@@ -180,8 +161,5 @@ Below is the chronological breakdown of the training dynamics and the final eval
 
 *Built by the PE-50 team (École Centrale de Lyon, 2025).*
 Inspired by **DeepMind’s AlphaGo Zero** and the open-source **KataGo** community.
-Code released under the **MIT Licence** — see `LICENSE` for details.
-
-
 
 
