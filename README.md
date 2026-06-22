@@ -64,7 +64,7 @@ git clone https://github.com/Skyxo/PE50-AI-for-the-Game-of-GO.git
 cd PE50-AI-for-the-Game-of-GO
 
 # Create a virtual env (Python ≥ 3.9 recommended)
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv ; source .venv/bin/activate
 
 # Core dependencies
 pip install torch numpy matplotlib tqdm tkinter
